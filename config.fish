@@ -2,9 +2,16 @@
 # Localizado no repositório e preparado para ser symlinkado em ~/.config/fish/config.fish
 
 if status is-interactive
-    # Determina o diretório raiz do KillerWhale se não definido
+    # Determina o diretório raiz do KillerWhale se não definido (resolvendo symlinks)
     if not set -q KW_ROOT
-        set -gx KW_ROOT (status dirname)
+        set -l script_path (status filename)
+        if test -e "$script_path"
+            set -gx KW_ROOT (path dirname (realpath "$script_path"))
+        else if test -d "$HOME/KillerWhale"
+            set -gx KW_ROOT "$HOME/KillerWhale"
+        else
+            set -gx KW_ROOT (status dirname)
+        end
     end
 
     # Adiciona diretórios do KillerWhale ao PATH

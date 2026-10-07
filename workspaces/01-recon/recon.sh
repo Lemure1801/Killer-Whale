@@ -11,7 +11,7 @@ TARGET_FILE="${HOME}/.killerwhale/target"
 # shellcheck source=/dev/null
 source "$KW_ROOT/theme/colors.sh"
 
-clear
+clear 2>/dev/null || true
 kw_banner
 echo -e "${KW_FG_GREEN}┌─[ ${KW_BOLD}WORKSPACE 01: RECONHECIMENTO & ENUMERAÇÃO${KW_RESET}${KW_FG_GREEN} ]──────────────────┐${KW_RESET}"
 target="NÃO DEFINIDO"

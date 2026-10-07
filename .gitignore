@@ -1,0 +1,36 @@
+# ==============================================================================
+# KillerWhale — Git Ignore Rules
+# ==============================================================================
+
+# Logs de auditoria e execuções dinâmicas
+logs/*.log
+*.log
+!logs/.gitkeep
+
+# Python cache & bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+
+# Neovim / Editores
+lazy-lock.json
+*.swp
+*.swo
+*~
+.netrwhist
+undo/
+
+# Backups gerados pelo bootstrap ou edição manual
+*.bak
+*.bak.*
+*.tmp
+
+# Arquivo de escopo acidental na raiz do repositório
+target
+.target
+
+# Sistema operacional / Arquivos de Desktop
+.DS_Store
+Thumbs.db

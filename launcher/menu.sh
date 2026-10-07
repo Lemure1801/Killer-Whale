@@ -37,7 +37,7 @@ switch_tmux_window() {
 }
 
 define_target() {
-    clear
+    clear 2>/dev/null || true
     echo -e "${KW_FG_GREEN}${KW_BOLD}=== DEFINIR ALVO / ESCOPO ===${KW_RESET}"
     echo -ne "${KW_FG_WHITE}Digite o IP ou hostname do alvo: ${KW_FG_AMBER}"
     read -r target
@@ -79,7 +79,7 @@ if command -v fzf >/dev/null 2>&1; then
         --border=sharp || true)
 else
     # Fallback caso fzf não esteja presente
-    clear
+    clear 2>/dev/null || true
     echo -e "${KW_FG_GREEN}${KW_BOLD}=== KILLERWHALE COMMAND PALETTE ===${KW_RESET}"
     for i in "${!ITEMS[@]}"; do
         printf "${KW_FG_GREEN}[%2d]${KW_RESET} %s\n" "$((i+1))" "${ITEMS[$i]}"

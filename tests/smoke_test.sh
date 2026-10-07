@@ -51,6 +51,7 @@ test_check "Diretório wrappers/" "[ -d '$KW_ROOT/wrappers' ]"
 test_check "Diretório nvim/" "[ -d '$KW_ROOT/nvim' ]"
 test_check "Diretório cheatsheets/" "[ -d '$KW_ROOT/cheatsheets' ]"
 test_check "Diretório theme/" "[ -d '$KW_ROOT/theme' ]"
+test_check "Diretório logs/" "[ -d '$KW_ROOT/logs' ]"
 
 echo -e "\n${KW_FG_GREEN}[2] Validação de Sintaxe Bash (bash -n):${KW_RESET}"
 while IFS= read -r script; do
@@ -85,6 +86,8 @@ fi
 
 echo -e "\n${KW_FG_GREEN}[6] Presença de Arquivos Chave de Configuração:${KW_RESET}"
 test_check "README.md" "[ -s '$KW_ROOT/README.md' ]"
+test_check ".gitignore" "[ -s '$KW_ROOT/.gitignore' ]"
+test_check "logs/.gitkeep" "[ -f '$KW_ROOT/logs/.gitkeep' ]"
 test_check "tmux.conf" "[ -s '$KW_ROOT/tmux/tmux.conf' ]"
 test_check "colors.sh" "[ -s '$KW_ROOT/theme/colors.sh' ]"
 test_check "alacritty.toml" "[ -s '$KW_ROOT/theme/alacritty.toml' ]"

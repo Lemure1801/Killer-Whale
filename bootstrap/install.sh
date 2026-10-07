@@ -41,7 +41,7 @@ log_info() {
     echo -e "    ${KW_FG_DIM}[i] $1${KW_RESET}"
 }
 
-clear
+clear 2>/dev/null || true
 kw_banner
 
 echo -e "${KW_FG_GREEN}┌─[ ${KW_BOLD}INICIALIZANDO INSTALAÇÃO DO KILLERWHALE NO ARCH LINUX${KW_RESET}${KW_FG_GREEN} ]────────┐${KW_RESET}"
@@ -101,11 +101,23 @@ PACMAN_PACKAGES=(
     net-tools
 )
 
+# Determina comando de elevação de privilégio se necessário
+SUDO_CMD=""
+if [ "$(id -u)" -ne 0 ]; then
+    if command -v sudo >/dev/null 2>&1; then
+        SUDO_CMD="sudo"
+    elif command -v doas >/dev/null 2>&1; then
+        SUDO_CMD="doas"
+    else
+        log_warn "Aviso: Nem 'sudo' nem 'doas' encontrados. Tentando executar pacman diretamente..."
+    fi
+fi
+
 if [ "$DRY_RUN" = true ]; then
-    log_info "[DRY-RUN] Executaria: sudo pacman -S --needed --noconfirm ${PACMAN_PACKAGES[*]}"
+    log_info "[DRY-RUN] Executaria: ${SUDO_CMD:+$SUDO_CMD }pacman -S --needed --noconfirm ${PACMAN_PACKAGES[*]}"
 else
     echo -e "    ${KW_FG_DIM}Instalando pacotes essenciais via pacman...${KW_RESET}"
-    sudo pacman -S --needed --noconfirm "${PACMAN_PACKAGES[@]}"
+    ${SUDO_CMD} pacman -S --needed --noconfirm "${PACMAN_PACKAGES[@]}"
     log_ok "Pacotes oficiais do sistema instalados/atualizados."
 fi
 

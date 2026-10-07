@@ -142,13 +142,13 @@ O prefixo padrão do tmux está configurado para **`Ctrl+a`** (com compatibilida
 ## 🛠️ Como Estender o Projeto
 
 ### Adicionando um Novo Workspace
-Consulte o guia detalhado em [`workspaces/README.md`](file:///home/vulture/KillerWhale/workspaces/README.md).
+Consulte o guia detalhado em [`workspaces/README.md`](workspaces/README.md).
 1. Crie o diretório em `workspaces/XX-nome/`.
 2. Adicione os scripts necessários.
 3. Cadastre a janela em `tmux/tmux.conf` e no launcher.
 
 ### Adicionando um Novo Wrapper
-Consulte o guia detalhado em [`wrappers/README.md`](file:///home/vulture/KillerWhale/wrappers/README.md).
+Consulte o guia detalhado em [`wrappers/README.md`](wrappers/README.md).
 1. Crie o arquivo `wrappers/<ferramenta>_wrap.py`.
 2. Utilize o template baseado na biblioteca `rich` para formatar a saída.
 3. Garanta a escrita do log em `$KW_ROOT/logs/`.

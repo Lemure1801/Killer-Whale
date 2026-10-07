@@ -6,6 +6,7 @@
 set -euo pipefail
 
 KW_ROOT="${KW_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+export KW_ROOT
 SESSION_NAME="killerwhale"
 CONF_FILE="$KW_ROOT/tmux/tmux.conf"
 
