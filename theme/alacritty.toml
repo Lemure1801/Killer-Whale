@@ -1,0 +1,54 @@
+# ==============================================================================
+# KillerWhale — Alacritty Terminal Configuration
+# Estética: Terminal Fósforo Verde CRT / Minimalista
+# ==============================================================================
+
+[window]
+padding = { x = 6, y = 6 }
+dynamic_padding = true
+opacity = 0.98
+decorations = "none"
+startup_mode = "Fullscreen"
+
+[font]
+size = 11.0
+
+[font.normal]
+family = "monospace"
+style = "Regular"
+
+[font.bold]
+family = "monospace"
+style = "Bold"
+
+[colors.primary]
+background = "#050a05"
+foreground = "#00ff66"
+
+[colors.cursor]
+text = "#050a05"
+cursor = "#66ff99"
+
+[colors.selection]
+text = "#050a05"
+background = "#00ff66"
+
+[colors.normal]
+black   = "#050a05"
+red     = "#ff3333"
+green   = "#00cc52"
+yellow  = "#ffb000"
+blue    = "#0088ff"
+magenta = "#b800e6"
+cyan    = "#00e5cc"
+white   = "#e0f2e0"
+
+[colors.bright]
+black   = "#1f3a1f"
+red     = "#ff5555"
+green   = "#00ff66"
+yellow  = "#ffd24d"
+blue    = "#33a3ff"
+magenta = "#cc33ff"
+cyan    = "#33ffee"
+white   = "#ffffff"
