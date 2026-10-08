@@ -55,7 +55,18 @@ def test_session_nested_guard():
     print("[✓] Proteção contra erro de sessões aninhadas ($TMUX) confirmada.")
 
 
+def test_requirements_file():
+    req_file = KW_ROOT / "requirements.txt"
+    assert req_file.is_file()
+    content = req_file.read_text()
+    assert "textual" in content
+    assert "pynvim" in content
+    assert "psutil" in content
+    print("[✓] requirements.txt verificado com sucesso.")
+
+
 if __name__ == "__main__":
+    test_requirements_file()
     test_kw_cli_help()
     test_kw_cli_doctor()
     test_kw_symlink_resolution()

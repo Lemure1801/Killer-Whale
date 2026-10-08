@@ -99,6 +99,7 @@ test_check "btop.theme" "[ -s '$KW_ROOT/theme/btop.theme' ]"
 test_check "nvim/init.lua" "[ -s '$KW_ROOT/nvim/init.lua' ]"
 test_check "kw (CLI)" "[ -s '$KW_ROOT/kw' ]"
 test_check "killerwhale.sh (Launcher)" "[ -s '$KW_ROOT/launcher/killerwhale.sh' ]"
+test_check "requirements.txt" "[ -s '$KW_ROOT/requirements.txt' ]"
 
 echo -e "\n${KW_FG_GREEN}[7] Validação Funcional da Engine Textual & Módulos (Python/Asyncio):${KW_RESET}"
 PYTHON_TEST_BIN="$KW_ROOT/.venv/bin/python"

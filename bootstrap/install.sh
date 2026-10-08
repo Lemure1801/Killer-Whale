@@ -121,8 +121,8 @@ else
     log_ok "Pacotes oficiais do sistema instalados/atualizados."
 fi
 
-# 3. Dependências Python da Nova Engine (Textual, Pynvim, Psutil)
-log_step "3/7. Instalando dependências do motor Textual & RPC Neovim..."
+# 3. Dependências Python da Nova Engine (Textual, Pynvim, Psutil, Pillow, Rich)
+log_step "3/7. Configurando ambiente Python (.venv) e instalando Textual..."
 PYTHON_DEPS=(
     textual
     pynvim
@@ -132,10 +132,25 @@ PYTHON_DEPS=(
     rich-pixels
 )
 if [ "$DRY_RUN" = true ]; then
-    log_info "[DRY-RUN] Executaria: pip install --break-system-packages ${PYTHON_DEPS[*]}"
+    log_info "[DRY-RUN] Criaria ambiente virtual em $KW_ROOT/.venv e instalaria dependências via pip."
 else
-    pip install --break-system-packages "${PYTHON_DEPS[@]}" || pip install --user "${PYTHON_DEPS[@]}" || log_warn "Não foi possível instalar via pip global/user; utilize o ambiente virtual do KillerWhale."
-    log_ok "Dependências Python da interface e RPC configuradas."
+    # 1. Cria o ambiente virtual do projeto se não existir
+    if [ ! -d "$KW_ROOT/.venv" ]; then
+        python3 -m venv --system-site-packages "$KW_ROOT/.venv" 2>/dev/null || python3 -m venv "$KW_ROOT/.venv"
+    fi
+
+    # 2. Instala dependências dentro do .venv
+    if [ -x "$KW_ROOT/.venv/bin/pip" ]; then
+        if [ -f "$KW_ROOT/requirements.txt" ]; then
+            "$KW_ROOT/.venv/bin/pip" install -r "$KW_ROOT/requirements.txt"
+        else
+            "$KW_ROOT/.venv/bin/pip" install "${PYTHON_DEPS[@]}"
+        fi
+        log_ok "Dependências Python instaladas com sucesso no ambiente virtual ($KW_ROOT/.venv)."
+    fi
+
+    # 3. Tenta também instalar global/user para comodidade adicional
+    pip install --break-system-packages "${PYTHON_DEPS[@]}" 2>/dev/null || pip install --user "${PYTHON_DEPS[@]}" 2>/dev/null || true
 fi
 
 # 4. Pacotes Complementares / AUR (gum para TUI avançada)

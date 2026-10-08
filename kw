@@ -51,10 +51,60 @@ Atalhos universais da VM:
 EOF
 }
 
+ensure_python_environment() {
+    # Se o interpretador atual já possui o módulo textual, prossegue diretamente (zero overhead)
+    if "$PYTHON_BIN" -c "import textual" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    echo -e "\033[38;2;0;255;209m[*] Módulo 'textual' não encontrado no interpretador ($PYTHON_BIN).\033[0m"
+    echo -e "\033[38;2;0;255;209m[*] Inicializando automaticamente ambiente virtual isolado (.venv)...\033[0m"
+
+    if [ ! -d "$KW_ROOT/.venv" ]; then
+        if command -v python3 >/dev/null 2>&1; then
+            python3 -m venv --system-site-packages "$KW_ROOT/.venv" 2>/dev/null || python3 -m venv "$KW_ROOT/.venv"
+        fi
+    fi
+
+    if [ -x "$KW_ROOT/.venv/bin/pip" ]; then
+        echo -e "\033[38;2;0;255;209m[*] Instalando dependências (textual, pynvim, psutil, pillow, rich)... Aguarde um instante.\033[0m"
+        local req_file="$KW_ROOT/requirements.txt"
+        if [ -f "$req_file" ]; then
+            if ! "$KW_ROOT/.venv/bin/pip" install -r "$req_file"; then
+                echo -e "\033[38;2;255;51;51m[!] Falha ao instalar dependências via pip no .venv.\033[0m" >&2
+                echo -e "Verifique sua conexão ou instale manualmente via:" >&2
+                echo -e "  $KW_ROOT/.venv/bin/pip install textual pynvim psutil pillow rich rich-pixels" >&2
+                exit 1
+            fi
+        else
+            if ! "$KW_ROOT/.venv/bin/pip" install textual pynvim psutil pillow rich rich-pixels; then
+                echo -e "\033[38;2;255;51;51m[!] Falha ao instalar dependências via pip no .venv.\033[0m" >&2
+                exit 1
+            fi
+        fi
+        PYTHON_BIN="$KW_ROOT/.venv/bin/python"
+        echo -e "\033[38;2;0;255;209m[✓] Ambiente virtual configurado com sucesso!\033[0m\n"
+    else
+        echo -e "\033[38;2;255;51;51m[!] pip não encontrado no ambiente virtual $KW_ROOT/.venv.\033[0m" >&2
+        echo -e "Tente instalar manualmente no sistema com:" >&2
+        echo -e "  pip install --break-system-packages textual pynvim psutil pillow rich rich-pixels" >&2
+        exit 1
+    fi
+}
+
 cmd_doctor() {
     echo -e "\033[38;2;0;255;209m[+] Verificando ambiente KillerWhale...\033[0m"
     echo "  - Diretório raiz: $KW_ROOT"
     echo "  - Python bin:     $PYTHON_BIN ($("$PYTHON_BIN" --version 2>/dev/null || echo 'desconhecido'))"
+
+    echo -e "  - Módulos essenciais:"
+    for mod in textual pynvim psutil PIL rich; do
+        if "$PYTHON_BIN" -c "import $mod" >/dev/null 2>&1; then
+            echo -e "      • $mod: \033[38;2;0;255;209m[✓] instalado\033[0m"
+        else
+            echo -e "      • $mod: \033[38;2;255;51;51m[✗] ausente\033[0m"
+        fi
+    done
 
     local sock="/tmp/killerwhale-nvim.sock"
     if [ -S "$sock" ]; then
@@ -140,8 +190,13 @@ case "${1:-}" in
         cmd_doctor
         exit 0
         ;;
-    install-global|setup)
+    install-global)
         cmd_install_global
+        exit 0
+        ;;
+    setup)
+        cmd_install_global
+        ensure_python_environment
         exit 0
         ;;
     session|tmux|-s|--session)
@@ -150,9 +205,11 @@ case "${1:-}" in
         ;;
     tui|engine)
         shift || true
+        ensure_python_environment
         exec "$PYTHON_BIN" -m killerwhale.app "$@"
         ;;
     *)
+        ensure_python_environment
         exec "$PYTHON_BIN" -m killerwhale.app "$@"
         ;;
 esac
