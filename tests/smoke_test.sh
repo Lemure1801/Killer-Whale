@@ -48,10 +48,12 @@ test_check "Diretório workspaces/01-recon/" "[ -d '$KW_ROOT/workspaces/01-recon
 test_check "Diretório workspaces/02-exploit/" "[ -d '$KW_ROOT/workspaces/02-exploit' ]"
 test_check "Diretório launcher/" "[ -d '$KW_ROOT/launcher' ]"
 test_check "Diretório wrappers/" "[ -d '$KW_ROOT/wrappers' ]"
+test_check "Diretório killerwhale/ (Engine Textual)" "[ -d '$KW_ROOT/killerwhale' ]"
 test_check "Diretório nvim/" "[ -d '$KW_ROOT/nvim' ]"
 test_check "Diretório cheatsheets/" "[ -d '$KW_ROOT/cheatsheets' ]"
 test_check "Diretório theme/" "[ -d '$KW_ROOT/theme' ]"
 test_check "Diretório logs/" "[ -d '$KW_ROOT/logs' ]"
+test_check "Executável kw (CLI de Entrada)" "[ -x '$KW_ROOT/kw' ]"
 
 echo -e "\n${KW_FG_GREEN}[2] Validação de Sintaxe Bash (bash -n):${KW_RESET}"
 while IFS= read -r script; do
@@ -63,9 +65,10 @@ echo -e "\n${KW_FG_GREEN}[3] Validação de Sintaxe Python (py_compile / AST):${
 while IFS= read -r py_file; do
     rel_path="${py_file#"$KW_ROOT/"}"
     test_check "Python: $rel_path" "python3 -m py_compile '$py_file'"
-done < <(find "$KW_ROOT/wrappers" -type f -name "*.py")
+done < <(find "$KW_ROOT/wrappers" "$KW_ROOT/killerwhale" -type f -name "*.py")
 # Limpa caches temporários criados pelo py_compile
-rm -rf "$KW_ROOT/wrappers/__pycache__"
+rm -rf "$KW_ROOT/wrappers/__pycache__" "$KW_ROOT/killerwhale/__pycache__" "$KW_ROOT/killerwhale/core/__pycache__" "$KW_ROOT/killerwhale/screens/__pycache__"
+
 
 echo -e "\n${KW_FG_GREEN}[4] Validação de Sintaxe Lua (luac -p):${KW_RESET}"
 if command -v luac >/dev/null 2>&1; then
@@ -94,6 +97,22 @@ test_check "alacritty.toml" "[ -s '$KW_ROOT/theme/alacritty.toml' ]"
 test_check "kitty.conf" "[ -s '$KW_ROOT/theme/kitty.conf' ]"
 test_check "btop.theme" "[ -s '$KW_ROOT/theme/btop.theme' ]"
 test_check "nvim/init.lua" "[ -s '$KW_ROOT/nvim/init.lua' ]"
+test_check "kw (CLI)" "[ -s '$KW_ROOT/kw' ]"
+test_check "killerwhale.sh (Launcher)" "[ -s '$KW_ROOT/launcher/killerwhale.sh' ]"
+
+echo -e "\n${KW_FG_GREEN}[7] Validação Funcional da Engine Textual & Módulos (Python/Asyncio):${KW_RESET}"
+PYTHON_TEST_BIN="$KW_ROOT/.venv/bin/python"
+if [ ! -x "$PYTHON_TEST_BIN" ]; then
+    PYTHON_TEST_BIN="python3"
+fi
+
+for test_script in "$KW_ROOT/tests"/test_etapa*.py "$KW_ROOT/tests"/test_marco_*.py "$KW_ROOT/tests"/test_cli_*.py; do
+    if [ -f "$test_script" ]; then
+        test_name="$(basename "$test_script")"
+        test_check "Teste: $test_name" "PYTHONPATH='$KW_ROOT' '$PYTHON_TEST_BIN' '$test_script'"
+    fi
+done
+
 
 echo -e "\n${KW_FG_DIM}========================================================================${KW_RESET}"
 echo -e "${KW_FG_WHITE}Resultados: ${KW_FG_BRIGHT}${PASSED} passaram${KW_RESET}, ${KW_FG_ALERT}${FAILED} falharam${KW_RESET}."

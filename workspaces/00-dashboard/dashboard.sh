@@ -8,6 +8,11 @@ set -u
 KW_ROOT="${KW_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 TARGET_FILE="${HOME}/.killerwhale/target"
 
+# Executa a nova engine Textual do KillerWhale se disponível
+if [ "${1:-}" != "--legacy" ] && [ -x "$KW_ROOT/kw" ]; then
+    exec "$KW_ROOT/kw"
+fi
+
 # Carrega a paleta central de cores se existir
 if [ -f "$KW_ROOT/theme/colors.sh" ]; then
     # shellcheck source=/dev/null

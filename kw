@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# KillerWhale — Central Entrypoint CLI & Orchestrator
+# Permite acesso instantâneo tanto à TUI Textual quanto à sessão tmux
+# ==============================================================================
+set -euo pipefail
+
+# Resolução canônica do diretório raiz mesmo através de symlinks
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+KW_ROOT="$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)"
+export KW_ROOT
+export PYTHONPATH="$KW_ROOT:${PYTHONPATH:-}"
+
+# Seleção do interpretador Python
+if [ -x "$KW_ROOT/.venv/bin/python" ]; then
+    PYTHON_BIN="$KW_ROOT/.venv/bin/python"
+elif command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+else
+    echo -e "\033[38;2;255;51;51m[!] Erro: Interpretador Python 3 não encontrado.\033[0m" >&2
+    exit 1
+fi
+
+show_help() {
+    cat << 'EOF'
+  _  ___ _ _     __          ___           _      
+ | |/ (_) | |    \ \        / / |         | |     
+ | ' / _| | | ___ \ \  /\  / /| |__   __ _| | ___ 
+ |  < | | | |/ _ \ \ \/  \/ / | '_ \ / _` | |/ _ \
+ | . \| | | |  __/  \  /\  /  | | | | (_| | |  __/
+ |_|\_\_|_|_|\___|   \/  \/   |_| |_|\__,_|_|\___|
+
+Uso: kw [COMANDO|OPÇÃO]
+
+Comandos principais:
+  kw                Inicia a TUI Textual v4 reativa (padrão)
+  kw session, tmux  Inicia ou anexa à sessão tmux com os 3 workspaces
+  kw tui, engine    Inicia a TUI diretamente no terminal atual
+  kw doctor         Verifica integridade das dependências e sockets
+  kw install-global Configura acesso universal em /usr/local/bin e shells
+  kw help, -h       Exibe esta ajuda
+
+Atalhos universais da VM:
+  kw                Acesso direto à interface TUI
+  killerwhale       Acesso direto à estação de trabalho tmux
+EOF
+}
+
+cmd_doctor() {
+    echo -e "\033[38;2;0;255;209m[+] Verificando ambiente KillerWhale...\033[0m"
+    echo "  - Diretório raiz: $KW_ROOT"
+    echo "  - Python bin:     $PYTHON_BIN ($("$PYTHON_BIN" --version 2>/dev/null || echo 'desconhecido'))"
+
+    local sock="/tmp/killerwhale-nvim.sock"
+    if [ -S "$sock" ]; then
+        echo -e "  - Neovim RPC:     \033[38;2;0;255;209mSocket ativo ($sock)\033[0m"
+    else
+        echo -e "  - Neovim RPC:     \033[38;2;120;140;140mSocket inativo ($sock)\033[0m"
+    fi
+
+    if tmux has-session -t "killerwhale" 2>/dev/null; then
+        echo -e "  - Sessão Tmux:    \033[38;2;0;255;209mAtiva ('killerwhale')\033[0m"
+    else
+        echo -e "  - Sessão Tmux:    \033[38;2;120;140;140mInativa\033[0m"
+    fi
+
+    if command -v kw >/dev/null 2>&1; then
+        echo -e "  - Comando global: \033[38;2;0;255;209m'kw' encontrado em $(command -v kw)\033[0m"
+    else
+        echo -e "  - Comando global: \033[38;2;255;176;0m'kw' não encontrado no PATH atual\033[0m"
+    fi
+}
+
+cmd_install_global() {
+    echo -e "\033[38;2;0;255;209m[*] Configurando acesso universal ao KillerWhale na VM...\033[0m"
+    mkdir -p "$HOME/.local/bin"
+
+    # Symlinks no ~/.local/bin
+    ln -sf "$KW_ROOT/kw" "$HOME/.local/bin/kw"
+    ln -sf "$KW_ROOT/launcher/killerwhale.sh" "$HOME/.local/bin/killerwhale"
+    echo -e "  [✓] Links criados em ~/.local/bin/ (kw, killerwhale)"
+
+    # Se tiver permissão sudo ou for root, tenta também /usr/local/bin
+    if [ "$(id -u)" -eq 0 ]; then
+        ln -sf "$KW_ROOT/kw" "/usr/local/bin/kw" 2>/dev/null || true
+        ln -sf "$KW_ROOT/launcher/killerwhale.sh" "/usr/local/bin/killerwhale" 2>/dev/null || true
+        echo -e "  [✓] Links criados em /usr/local/bin/ (kw, killerwhale)"
+    elif command -v sudo >/dev/null 2>&1; then
+        if sudo -n true 2>/dev/null; then
+            sudo ln -sf "$KW_ROOT/kw" "/usr/local/bin/kw" 2>/dev/null || true
+            sudo ln -sf "$KW_ROOT/launcher/killerwhale.sh" "/usr/local/bin/killerwhale" 2>/dev/null || true
+            echo -e "  [✓] Links criados em /usr/local/bin/ (kw, killerwhale)"
+        fi
+    fi
+
+    # Garante PATH e aliases no ~/.bashrc
+    if [ -f "$HOME/.bashrc" ]; then
+        if ! grep -q "KILLERWHALE_ENV" "$HOME/.bashrc"; then
+            cat << 'EOF' >> "$HOME/.bashrc"
+
+# --- KILLERWHALE_ENV ---
+export PATH="$HOME/.local/bin:$PATH"
+alias kw="$HOME/.local/bin/kw"
+alias killerwhale="$HOME/.local/bin/killerwhale"
+# -----------------------
+EOF
+            echo -e "  [✓] Configurações de PATH e aliases injetadas em ~/.bashrc"
+        fi
+    fi
+
+    # Garante PATH e aliases no config.fish se existir
+    if [ -f "$HOME/.config/fish/config.fish" ]; then
+        if ! grep -q "alias killerwhale" "$HOME/.config/fish/config.fish"; then
+            cat << 'EOF' >> "$HOME/.config/fish/config.fish"
+
+# --- KillerWhale Universal CLI ---
+set -gx PATH $HOME/.local/bin $PATH
+alias kw="$HOME/.local/bin/kw"
+alias killerwhale="$HOME/.local/bin/killerwhale"
+EOF
+            echo -e "  [✓] Configurações de PATH e aliases injetadas em ~/.config/fish/config.fish"
+        fi
+    fi
+
+    echo -e "\033[38;2;0;255;209m[✓] Acesso universal configurado com sucesso! Digite 'kw' ou 'killerwhale'.\033[0m"
+}
+
+# Despacho de subcomandos
+case "${1:-}" in
+    -h|--help|help)
+        show_help
+        exit 0
+        ;;
+    doctor|status)
+        cmd_doctor
+        exit 0
+        ;;
+    install-global|setup)
+        cmd_install_global
+        exit 0
+        ;;
+    session|tmux|-s|--session)
+        shift || true
+        exec bash "$KW_ROOT/tmux/session.sh" "$@"
+        ;;
+    tui|engine)
+        shift || true
+        exec "$PYTHON_BIN" -m killerwhale.app "$@"
+        ;;
+    *)
+        exec "$PYTHON_BIN" -m killerwhale.app "$@"
+        ;;
+esac

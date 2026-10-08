@@ -121,8 +121,25 @@ else
     log_ok "Pacotes oficiais do sistema instalados/atualizados."
 fi
 
-# 3. Pacotes Complementares / AUR (gum para TUI avançada)
-log_step "3/6. Verificando utilitários interativos avançados (gum)..."
+# 3. Dependências Python da Nova Engine (Textual, Pynvim, Psutil)
+log_step "3/7. Instalando dependências do motor Textual & RPC Neovim..."
+PYTHON_DEPS=(
+    textual
+    pynvim
+    psutil
+    rich
+    pillow
+    rich-pixels
+)
+if [ "$DRY_RUN" = true ]; then
+    log_info "[DRY-RUN] Executaria: pip install --break-system-packages ${PYTHON_DEPS[*]}"
+else
+    pip install --break-system-packages "${PYTHON_DEPS[@]}" || pip install --user "${PYTHON_DEPS[@]}" || log_warn "Não foi possível instalar via pip global/user; utilize o ambiente virtual do KillerWhale."
+    log_ok "Dependências Python da interface e RPC configuradas."
+fi
+
+# 4. Pacotes Complementares / AUR (gum para TUI avançada)
+log_step "4/7. Verificando utilitários interativos avançados (gum)..."
 if command -v gum >/dev/null 2>&1; then
     log_ok "Utilitário 'gum' já disponível."
 else
@@ -137,8 +154,8 @@ else
     fi
 fi
 
-# 4. Criação da Estrutura de Diretórios de Runtime
-log_step "4/6. Configurando diretórios locais de auditoria e runtime..."
+# 5. Criação da Estrutura de Diretórios de Runtime
+log_step "5/7. Configurando diretórios locais de auditoria e runtime..."
 LOG_DIR="${HOME}/.killerwhale/logs"
 TARGET_DIR="${HOME}/.killerwhale"
 
@@ -153,8 +170,8 @@ else
     log_ok "Estrutura ~/.killerwhale/ pronta."
 fi
 
-# 5. Aplicação Idempotente de Symlinks (com Backup de Preexistentes)
-log_step "5/6. Vinculando dotfiles (symlinks com backup preventivo)..."
+# 6. Aplicação Idempotente de Symlinks (com Backup de Preexistentes)
+log_step "6/7. Vinculando dotfiles (symlinks com backup preventivo)..."
 
 link_file() {
     local src="$1"
@@ -214,11 +231,42 @@ fi
 mkdir -p "$HOME/.config/btop/themes" 2>/dev/null || true
 link_file "$KW_ROOT/theme/btop.theme" "$HOME/.config/btop/themes/killerwhale.theme"
 
-# 6. Conclusão e Permissões
-log_step "6/6. Ajustando permissões de execução dos scripts..."
+# Universal Access CLI (kw e killerwhale)
+mkdir -p "$HOME/.local/bin" 2>/dev/null || true
+link_file "$KW_ROOT/kw" "$HOME/.local/bin/kw"
+link_file "$KW_ROOT/launcher/killerwhale.sh" "$HOME/.local/bin/killerwhale"
+
+# Tentativa de links globais no /usr/local/bin se houver sudo/root
+if [ "$(id -u)" -eq 0 ]; then
+    ln -sf "$KW_ROOT/kw" "/usr/local/bin/kw" 2>/dev/null || true
+    ln -sf "$KW_ROOT/launcher/killerwhale.sh" "/usr/local/bin/killerwhale" 2>/dev/null || true
+    log_ok "Comandos 'kw' e 'killerwhale' instalados em /usr/local/bin"
+elif [ -n "$SUDO_CMD" ]; then
+    $SUDO_CMD ln -sf "$KW_ROOT/kw" "/usr/local/bin/kw" 2>/dev/null || true
+    $SUDO_CMD ln -sf "$KW_ROOT/launcher/killerwhale.sh" "/usr/local/bin/killerwhale" 2>/dev/null || true
+    log_ok "Comandos 'kw' e 'killerwhale' instalados em /usr/local/bin"
+fi
+
+# Configuração de PATH e aliases no ~/.bashrc
+if [ -f "$HOME/.bashrc" ] && ! grep -q "KILLERWHALE_ENV" "$HOME/.bashrc"; then
+    cat << 'EOF' >> "$HOME/.bashrc"
+
+# --- KILLERWHALE_ENV ---
+export PATH="$HOME/.local/bin:$PATH"
+alias kw="$HOME/.local/bin/kw"
+alias killerwhale="$HOME/.local/bin/killerwhale"
+# -----------------------
+EOF
+    log_ok "Ambiente e atalhos configurados em ~/.bashrc"
+fi
+
+# 7. Conclusão e Permissões
+log_step "7/7. Ajustando permissões de execução dos scripts..."
 if [ "$DRY_RUN" = true ]; then
     log_info "[DRY-RUN] Aplicaria chmod +x em scripts do projeto."
 else
+    chmod +x "$KW_ROOT/kw" 2>/dev/null || true
+    chmod +x "$KW_ROOT/launcher/killerwhale.sh" 2>/dev/null || true
     chmod +x "$KW_ROOT/workspaces/00-dashboard/"*.sh
     chmod +x "$KW_ROOT/workspaces/01-recon/"*.sh 2>/dev/null || true
     chmod +x "$KW_ROOT/workspaces/02-exploit/"*.sh 2>/dev/null || true
@@ -229,12 +277,13 @@ else
     log_ok "Permissões de execução ajustadas com sucesso."
 fi
 
+
 echo ""
 echo -e "${KW_FG_BRIGHT}${KW_BOLD}========================================================================${KW_RESET}"
 echo -e "${KW_FG_BRIGHT}${KW_BOLD}             INSTALAÇÃO DO KILLERWHALE FINALIZADA COM SUCESSO!          ${KW_RESET}"
 echo -e "${KW_FG_BRIGHT}${KW_BOLD}========================================================================${KW_RESET}"
-echo -e "${KW_FG_WHITE}Para iniciar o ambiente, execute:${KW_RESET}"
-echo -e "  ${KW_FG_GREEN}bash $KW_ROOT/tmux/session.sh${KW_RESET}"
-echo -e "ou diretamente com o tmux:"
-echo -e "  ${KW_FG_GREEN}tmux -f $KW_ROOT/tmux/tmux.conf new-session -A -s killerwhale${KW_RESET}"
+echo -e "${KW_FG_WHITE}Comandos universais disponíveis de qualquer diretório na VM:${KW_RESET}"
+echo -e "  ${KW_FG_GREEN}kw${KW_RESET}          -> Inicia a interface TUI reativa v4 diretamente"
+echo -e "  ${KW_FG_GREEN}killerwhale${KW_RESET} -> Inicia a estação de trabalho completa (tmux + workspaces + TUI)"
+echo -e "  ${KW_FG_GREEN}kw session${KW_RESET}  -> Alternativa para iniciar a estação tmux"
 echo ""

@@ -21,13 +21,16 @@ Construído sob a estética de terminais CRT de fósforo verde e caracteres box-
 
 ## 🏛️ Filosofia e Arquitetura
 
-1. **100% Modo Texto (Sem GUI)**: Opera com perfeição em TTY puro ou terminal gráfico fullscreen, sem dependência de X11 ou Wayland.
-2. **Workspaces em Tela Cheia via `tmux`**: Cada workspace lógico executa **uma única tarefa em tela cheia** por janela. Não há acúmulo de splits permanentes que causam poluição visual.
-3. **Painel de Controle Central (`00-dashboard`)**: Ponto de partida com resumo de telemetria de hardware (`btop`), utilitários de limpeza/manutenção do sistema (`cleanup.sh`), cheatsheets e atalhos de navegação.
-4. **Command Palette (`fzf`)**: Menu modal acessível globalmente para disparar workspaces, utilitários e wrappers com busca difusa.
-5. **Wrappers Inteligentes**: Camada de execução sobre ferramentas padrão (`nmap`, `sqlmap`, etc.) que padroniza saídas em caixas ASCII usando Python (`rich`) e armazena logs auditáveis com timestamp em `logs/`.
-6. **Neovim Isolado**: Configuração dedicada e modular do Neovim (`nvim/`) que não interfere nas preferências pessoais do usuário.
-7. **Idempotência Total**: O instalador de bootstrap pode ser executado múltiplas vezes de forma segura, criando backups automáticos de configurações preexistentes.
+1. **Engine Reativa Textual v4 (Python + Textual)**: O núcleo operacional do KillerWhale é uma aplicação de terminal de alto desempenho com event loop assíncrono nativo (`./kw`), widgets reativos e renderização sem cintilação sob a estética CRT fósforo ciano/verde-água (#00ffd1 / #4dffef) em fundo preto absoluto (#000000).
+2. **Sistema Leader-Key (TAB Prefix)**: Tecla `TAB` atua exclusivamente como tecla líder (com timeout de ~1.5s), desativando o ciclo padrão de foco e habilitando atalhos instantâneos de navegação e orquestração.
+3. **Layout Tríptico de Alta Ergonomia**:
+   - **Barra Superior**: Navegação de abas (Dashboard, Recon, Exploit, etc.).
+   - **Painel Esquerdo (Output/Telemetria)**: Terminal read-only com sub-abas, streaming de comandos e monitoramento de sistema sem flickering.
+   - **Painel Direito (PTY Interativo)**: Múltiplos pseudoterminais interativos paralelos (`/bin/bash`) rodando concorrentemente com isolamento de I/O e ciclo de vida limpo (sem processos órfãos).
+4. **Arte ASCII & Splash Screen**: Renderização de arte ASCII com mapeamento de luminância e recoloração tonal na paleta ciano do tema (`Pillow`).
+5. **Integração Real com Neovim via RPC (`pynvim`)**: Comunicação IPC bidirecional através do socket `/tmp/killerwhale-nvim.sock`. A interface comanda a instância em execução para abrir arquivos, injetar relatórios e manipular buffers sem duplicar processos nem depender de `tmux send-keys`.
+6. **Orquestrador de Auditoria Integrado**: Execução monitorada de ferramentas (`nmap`, `sqlmap`), extração de tabelas de portas/vulnerabilidades e despacho de relatórios completos em Markdown para o Neovim com um clique (`e`).
+7. **tmux como Multiplexador de Sistema**: Mantido como camada de sustentação no nível do SO, garantindo que o KillerWhale funcione como um segundo sistema operacional leve.
 
 ---
 
@@ -36,9 +39,16 @@ Construído sob a estética de terminais CRT de fósforo verde e caracteres box-
 ```
 KillerWhale/
 ├── README.md                      # Documentação principal e guia de uso
+├── AUDIT.md                       # Auditoria técnica e matriz de transição
+├── kw                             # CLI de inicialização rápida da engine Textual
 ├── config.fish                    # Configuração para fish shell (aliases e PATH)
 ├── bootstrap/
 │   └── install.sh                 # Script idempotente de instalação para Arch Linux
+├── killerwhale/                   # Engine Textual principal (Python 3 / Textual)
+│   ├── app.py                     # Loop de eventos central e roteador de telas
+│   ├── theme.py                   # Paleta fósforo verde e stylesheet TCSS
+│   ├── core/                      # Módulos de telemetria, RPC Neovim e orquestração
+│   └── screens/                   # Telas reativas (Dashboard, Scanner, Cheatsheet, Cleanup, Launcher)
 ├── tmux/
 │   └── tmux.conf                  # Configuração do tmux (workspaces, status bar, atalhos)
 ├── workspaces/
@@ -115,14 +125,33 @@ O script `bootstrap/install.sh` instala automaticamente os seguintes componentes
    bash bootstrap/install.sh
    ```
 
-3. **Iniciar a sessão KillerWhale**:
-   ```bash
-   tmux -f ~/KillerWhale/tmux/tmux.conf new-session -A -s killerwhale
-   ```
+3. **Acesso Universal na VM (Comandos Rápidos)**:
+   Após o bootstrap (ou executando `./kw install-global`), a ferramenta está disponível universalmente em qualquer terminal e diretório:
+   - **`kw`** : Inicia instantaneamente a interface TUI reativa v4 (modo standalone em tela cheia).
+   - **`killerwhale`** : Inicia ou anexa à estação de trabalho completa no tmux (com workspaces 00-dashboard, 01-recon e 02-exploit).
+   - **`kw session`** : Alternativa rápida para abrir/anexar à sessão tmux.
+   - **`kw doctor`** : Diagnóstico do ambiente e verificação de sockets/processos.
 
 ---
 
-## ⌨️ Atalhos Principais
+### ⌨️ Atalhos da Engine TUI (`./kw` — Prefixo `TAB`)
+
+Pressione `TAB` para armar a **tecla líder** (timeout de ~1.5s):
+
+| Combinação | Ação |
+|---|---|
+| `TAB` + `0`–`9` | Salta diretamente para a aba correspondente (0 = Dashboard) |
+| `TAB` + `Ctrl+/` | Ativa/desativa modo de digitação no terminal interativo PTY |
+| `TAB` + `Shift+/` | Abre busca fuzzy de abas por nome (modal interativo) |
+| `TAB` + `Shift+L` | Abre lista navegável de todas as abas registradas |
+| `TAB` + `Ctrl+Left` / `Right` | Alterna entre as sub-abas do painel de output (read-only) |
+| `TAB` + `Ctrl+T` | Cria novo terminal PTY interativo em paralelo (sub-aba direita) |
+| `TAB` + `Ctrl+W` | Fecha o terminal PTY ativo (limpeza de processo sem zumbis) |
+| `Ctrl+C` / `q` | Encerra a aplicação de forma graciosa |
+
+---
+
+### ⌨️ Atalhos do Multiplexador `tmux` (Prefixo `Ctrl+a`)
 
 O prefixo padrão do tmux está configurado para **`Ctrl+a`** (com compatibilidade para `Ctrl+b`):
 

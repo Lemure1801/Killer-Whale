@@ -1,40 +1,41 @@
-# KillerWhale phosphor green theme for btop
-# Matching central palette: #050a05 (bg), #00ff66 (fg), #ffb000 (accent), #ff3333 (alert)
+# KillerWhale phosphorescent cyan theme for btop
+# Matching central palette: #000000 (bg), #00ffd1 (fg), #4dffef (hi), #00b398 (accent), #ff3355 (alert)
 
-theme[main_bg]="#050a05"
-theme[main_fg]="#00ff66"
-theme[title]="#66ff99"
+theme[main_bg]="#000000"
+theme[main_fg]="#00ffd1"
+theme[title]="#4dffef"
 theme[hi_fg]="#ffffff"
-theme[selected_bg]="#003311"
+theme[selected_bg]="#00332b"
 theme[selected_fg]="#ffffff"
-theme[inactive_fg]="#006622"
-theme[proc_misc]="#00cc52"
+theme[inactive_fg]="#00594d"
+theme[proc_misc]="#00ffd1"
 
 # Box borders and dividers
-theme[cpu_box]="#009933"
-theme[mem_box]="#009933"
-theme[net_box]="#009933"
-theme[proc_box]="#009933"
-theme[div_line]="#004d1a"
+theme[cpu_box]="#008b7a"
+theme[mem_box]="#008b7a"
+theme[net_box]="#008b7a"
+theme[proc_box]="#008b7a"
+theme[div_line]="#00332b"
 
-# Meters and graphs (Phosphor green gradient to amber to red)
-theme[temp_start]="#00cc52"
-theme[temp_mid]="#ffb000"
-theme[temp_end]="#ff3333"
+# Meters and graphs (Phosphor cyan gradient to amber to red)
+theme[temp_start]="#00ffd1"
+theme[temp_mid]="#00b398"
+theme[temp_end]="#ff3355"
 
-theme[cpu_start]="#00aa33"
-theme[cpu_mid]="#00ff66"
-theme[cpu_end]="#ffb000"
+theme[cpu_start]="#00594d"
+theme[cpu_mid]="#00ffd1"
+theme[cpu_end]="#4dffef"
 
-theme[free]="#004d1a"
-theme[cached]="#00802b"
-theme[available]="#00b33c"
-theme[used]="#00ff66"
+theme[free]="#002620"
+theme[cached]="#00594d"
+theme[available]="#008b7a"
+theme[used]="#00ffd1"
 
-theme[download_start]="#00802b"
-theme[download_mid]="#00ff66"
-theme[download_end]="#66ff99"
+theme[download_start]="#00594d"
+theme[download_mid]="#00ffd1"
+theme[download_end]="#4dffef"
 
-theme[upload_start]="#006622"
-theme[upload_mid]="#00cc52"
-theme[upload_end]="#ffb000"
+theme[upload_start]="#00332b"
+theme[upload_mid]="#00ffd1"
+theme[upload_end]="#00b398"
+

@@ -26,7 +26,9 @@ if status is-interactive
     set -q KW_LOG_DIR; or set -gx KW_LOG_DIR "$KW_ROOT/logs"
 
     # Atalhos rápidos do KillerWhale
-    alias kw="$KW_ROOT/launcher/menu.sh"
+    alias kw="$KW_ROOT/kw"
+    alias killerwhale="$KW_ROOT/killerwhale"
+    alias kw-session="$KW_ROOT/tmux/session.sh"
     alias kw-dash="$KW_ROOT/workspaces/00-dashboard/dashboard.sh"
     alias kw-clean="$KW_ROOT/workspaces/00-dashboard/cleanup.sh"
     alias kw-cheat="$KW_ROOT/workspaces/00-dashboard/cheatsheet.sh"

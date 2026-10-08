@@ -22,33 +22,34 @@ family = "monospace"
 style = "Bold"
 
 [colors.primary]
-background = "#050a05"
-foreground = "#00ff66"
+background = "#000000"
+foreground = "#00ffd1"
 
 [colors.cursor]
-text = "#050a05"
-cursor = "#66ff99"
+text = "#000000"
+cursor = "#4dffef"
 
 [colors.selection]
-text = "#050a05"
-background = "#00ff66"
+text = "#000000"
+background = "#00ffd1"
 
 [colors.normal]
-black   = "#050a05"
-red     = "#ff3333"
-green   = "#00cc52"
-yellow  = "#ffb000"
+black   = "#000000"
+red     = "#ff3355"
+green   = "#00ffd1"
+yellow  = "#00b398"
 blue    = "#0088ff"
 magenta = "#b800e6"
-cyan    = "#00e5cc"
-white   = "#e0f2e0"
+cyan    = "#4dffef"
+white   = "#e6ffff"
 
 [colors.bright]
-black   = "#1f3a1f"
-red     = "#ff5555"
-green   = "#00ff66"
-yellow  = "#ffd24d"
+black   = "#002620"
+red     = "#ff5577"
+green   = "#4dffef"
+yellow  = "#00ffd1"
 blue    = "#33a3ff"
 magenta = "#cc33ff"
-cyan    = "#33ffee"
+cyan    = "#4dffef"
 white   = "#ffffff"
+

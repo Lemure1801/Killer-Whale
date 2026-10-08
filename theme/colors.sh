@@ -5,14 +5,15 @@
 # ==============================================================================
 
 # Definições Hexadecimais (para configs de emuladores e apps externos)
-export KW_HEX_BG="#050a05"          # Fundo quase negro profundo com leve tom esmeralda
-export KW_HEX_FG="#00ff66"          # Fósforo verde primário de alta luminosidade
-export KW_HEX_FG_BRIGHT="#66ff99"   # Verde brilhante para destaques
-export KW_HEX_FG_DIM="#006622"      # Verde escuro / bordas atenuadas
-export KW_HEX_WHITE="#f0fff0"       # Branco menta para texto de alto contraste
-export KW_HEX_ACCENT="#ffb000"      # Âmbar para avisos e telemetria
-export KW_HEX_ALERT="#ff3333"       # Vermelho fósforo para erros críticos
-export KW_HEX_GRAY="#1a2e1a"        # Linhas divisórias e caixas secundárias
+export KW_HEX_BG="#000000"          # Fundo preto absoluto
+export KW_HEX_FG="#00ffd1"          # Ciano/verde-água fosforescente primário
+export KW_HEX_FG_BRIGHT="#4dffef"   # Ciano brilhante para destaques intensos
+export KW_HEX_FG_DIM="#00594d"      # Ciano escuro / bordas atenuadas
+export KW_HEX_WHITE="#e6ffff"       # Branco ciano luminoso para texto de alto contraste
+export KW_HEX_ACCENT="#00b398"      # Ciano intermediário para telemetria
+export KW_HEX_ALERT="#ff3355"       # Alerta / erros críticos
+export KW_HEX_GRAY="#002620"        # Linhas divisórias e caixas secundárias
+export KW_HEX_SURFACE="#050e0c"     # Superfície de cards e painéis
 
 # Códigos ANSI Escape (Bash / Shell)
 export KW_RESET="\033[0m"
@@ -22,17 +23,19 @@ export KW_ITALIC="\033[3m"
 export KW_UNDERLINE="\033[4m"
 
 # Cores de Texto (Foreground)
-export KW_FG_GREEN="\033[38;2;0;255;102m"
-export KW_FG_BRIGHT="\033[38;2;102;255;153m"
-export KW_FG_DIM="\033[38;2;0;102;34m"
-export KW_FG_WHITE="\033[38;2;240;255;240m"
-export KW_FG_AMBER="\033[38;2;255;176;0m"
-export KW_FG_ALERT="\033[38;2;255;51;51m"
-export KW_FG_GRAY="\033[38;2;90;120;90m"
+export KW_FG_GREEN="\033[38;2;0;255;209m"
+export KW_FG_CYAN="\033[38;2;0;255;209m"
+export KW_FG_BRIGHT="\033[38;2;77;255;239m"
+export KW_FG_DIM="\033[38;2;0;89;77m"
+export KW_FG_WHITE="\033[38;2;230;255;255m"
+export KW_FG_AMBER="\033[38;2;0;179;152m"
+export KW_FG_ALERT="\033[38;2;255;51;85m"
+export KW_FG_GRAY="\033[38;2;0;89;77m"
 
 # Cores de Fundo (Background)
-export KW_BG_DARK="\033[48;2;5;10;5m"
-export KW_BG_HL="\033[48;2;15;35;15m"
+export KW_BG_DARK="\033[48;2;0;0;0m"
+export KW_BG_HL="\033[48;2;0;51;43m"
+
 
 # Funções Auxiliares de Formatação e Box-Drawing
 kw_banner() {
